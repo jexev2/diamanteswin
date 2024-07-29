@@ -36,19 +36,20 @@ document.addEventListener('DOMContentLoaded', function() {
             square.addEventListener('click', function() {
                 if (!square.classList.contains('checked') && !gameOver) {
                     if (square.classList.contains('bomb')) {
-                        square.textContent = '💣';
+                        square.style.backgroundImage = 'url("img/bomba.png")';
                         square.style.backgroundColor = 'red';
                         result.textContent = '¡Perdiste! Intenta de nuevo.';
                         gameOver = true;
                         showNotification('Game Over');
                         revealBoard();
+                        playExplosionSound();
                     } else {
                         square.style.backgroundColor = 'lightgrey';
                         if (square.classList.contains('diamond')) {
-                            square.textContent = '💎';
+                            square.style.backgroundImage = 'url("img/diamante.png")';
                             foundDiamonds++;
                             progressBar.style.width = (foundDiamonds * 5) + '%';
-                            if (foundDiamonds === 20) {
+                            if (foundDiamonds === diamonds) {
                                 result.textContent = '¡Ganaste!';
                                 gameOver = true;
                                 showNotification('¡Felicidades, has ganado!');
@@ -95,10 +96,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const squares = document.querySelectorAll('.square');
         squares.forEach(square => {
             if (square.classList.contains('bomb')) {
-                square.textContent = '💣';
+                square.style.backgroundImage = 'url("img/bomba.png")';
                 square.style.backgroundColor = 'red';
             } else if (square.classList.contains('diamond')) {
-                square.textContent = '💎';
+                square.style.backgroundImage = 'url("img/diamante.png")';
             }
             square.classList.add('checked');
         });
@@ -109,16 +110,21 @@ document.addEventListener('DOMContentLoaded', function() {
         notification.style.display = 'block';
     }
 
+    function playExplosionSound() {
+        const explosionSound = new Audio('sounds/explosión.mp3');
+        explosionSound.play();
+    }
+
     retryBtn.addEventListener('click', function() {
-        gameOver = false;
-        foundDiamonds = 0;
-        result.textContent = '';
         notification.style.display = 'none';
+        grid.innerHTML = '';
+        result.textContent = '';
         progressBar.style.width = '0%';
         linkBtn.style.display = 'none';
-        grid.innerHTML = ''; // Limpiar el grid
-        createGrid(); // Crear un nuevo juego
+        gameOver = false;
+        foundDiamonds = 0;
+        createGrid();
     });
 
-    createGrid(); // Iniciar el juego al cargar la página
+    createGrid();
 });

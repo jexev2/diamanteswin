@@ -8,12 +8,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const retryBtn = document.getElementById('retry-btn');
     const soundBtn = document.getElementById('sound-btn');
     const backgroundMusic = document.getElementById('background-music');
+    const attemptsElement = document.getElementById('attempts');
 
     let diamonds = 20;
     let bombs = 5;
     let foundDiamonds = 0;
     let gameOver = false;
     let musicPlaying = false;
+    let attempts = localStorage.getItem('attempts') ? parseInt(localStorage.getItem('attempts')) : 5;
+
+    attemptsElement.textContent = attempts;
 
     soundBtn.addEventListener('click', function() {
         if (musicPlaying) {
@@ -39,10 +43,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         square.style.backgroundImage = 'url("img/bomba.png")';
                         square.style.backgroundColor = 'red';
                         result.textContent = '¡Perdiste! Intenta de nuevo.';
-                        gameOver = true;
-                        showNotification('Game Over');
-                        revealBoard();
-                        playExplosionSound();
+                        attempts = Math.max(attempts - 1, 0);  // Ensure attempts don't go negative
+                        attemptsElement.textContent = attempts;
+                        localStorage.setItem('attempts', attempts);
+                        if (attempts === 0) {
+                            showNotification('Se han agotado los intentos. Refresca la página para reiniciar.');
+                            gameOver = true;
+                        } else {
+                            gameOver = true;
+                            showNotification('Game Over');
+                            revealBoard();
+                            playExplosionSound();
+                        }
                     } else {
                         square.style.backgroundColor = 'lightgrey';
                         if (square.classList.contains('diamond')) {
@@ -116,14 +128,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     retryBtn.addEventListener('click', function() {
-        notification.style.display = 'none';
-        grid.innerHTML = '';
-        result.textContent = '';
-        progressBar.style.width = '0%';
-        linkBtn.style.display = 'none';
-        gameOver = false;
-        foundDiamonds = 0;
-        createGrid();
+        if (attempts === 0) {
+            localStorage.removeItem('attempts');
+            location.reload();  // Refresh the entire page
+        } else {
+            notification.style.display = 'none';
+            grid.innerHTML = '';
+            result.textContent = '';
+            progressBar.style.width = '0%';
+            linkBtn.style.display = 'none';
+            gameOver = false;
+            foundDiamonds = 0;
+            createGrid();
+        }
     });
 
     createGrid();
